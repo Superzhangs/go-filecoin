@@ -154,15 +154,20 @@ func TestWaitConflicting(t *testing.T) {
 
 	b1 := chain.RequireMkFakeChild(require,
 		chain.FakeChildParams{
-			Parent: baseTS, GenesisCid: chainStore.GenesisCid(), StateRoot: baseBlock.StateRoot})
+			Parent:     baseTS,
+			GenesisCid: chainStore.GenesisCid(),
+			StateRoot:  baseBlock.StateRoot,
+		})
 	b1.Messages = []*types.SignedMessage{sm1}
 	b1.Ticket = []byte{0} // block 1 comes first in message application
 	core.MustPut(cst, b1)
 
 	b2 := chain.RequireMkFakeChild(require,
 		chain.FakeChildParams{
-			Parent: baseTS, GenesisCid: chainStore.GenesisCid(),
-			StateRoot: baseBlock.StateRoot, Nonce: uint64(1)})
+			Parent:     baseTS,
+			GenesisCid: chainStore.GenesisCid(),
+			StateRoot:  baseBlock.StateRoot,
+			Nonce:      uint64(1)})
 	b2.Messages = []*types.SignedMessage{sm2}
 	b2.Ticket = []byte{1}
 	core.MustPut(cst, b2)

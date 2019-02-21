@@ -81,6 +81,10 @@ func (tv *TestPowerTableView) HasPower(ctx context.Context, st state.Tree, bstor
 // to be correct
 func NewValidTestBlockFromTipSet(baseTipSet types.TipSet, height uint64, minerAddr, signerAddr address.Address, signer types.Signer) *types.Block {
 	postProof := MakeRandomPoSTProofForTest()
+
+	if signer == nil {
+		panic("signer is nil")
+	}
 	ticket := createTicket(postProof, signerAddr, signer)
 
 	baseTsBlock := baseTipSet.ToSlice()[0]
@@ -201,7 +205,7 @@ func createTicket(proof proofs.PoStProof, signerAddr address.Address, signer typ
 
 	ticket, err := signer.SignBytes(h[:], signerAddr)
 	if err != nil {
-		errMsg := fmt.Sprintf("SignBytes error in CreateTicket: %s", err.Error())
+		errMsg := fmt.Sprintf("SignBytes error in testing version of createTicket: %s", err.Error())
 		panic(errMsg)
 	}
 	return ticket

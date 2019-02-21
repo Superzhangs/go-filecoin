@@ -305,29 +305,6 @@ func TestMinerSetPrice(t *testing.T) {
 	assert.Equal(`"62"`, configuredPrice.ReadStdoutTrimNewlines())
 }
 
-func TestMinerAddAskSuccess(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	d1 := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
-	defer d1.ShutdownSuccess()
-	d := th.NewDaemon(t, th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
-	defer d.ShutdownSuccess()
-	d1.ConnectSuccess(d)
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		miner := d.RunSuccess("miner", "create", "--from", fixtures.TestAddresses[2], "--price", "0", "--limit", "300", "100", "200")
-		addr, err := address.NewFromString(strings.Trim(miner.ReadStdout(), "\n"))
-		assert.NoError(err)
-		assert.NotEqual(addr, address.Address{})
-		wg.Done()
-	}()
-	// ensure mining runs after the command in our goroutine
-	d1.MineAndPropagate(time.Second, d)
-	wg.Wait()
-}
-
 func TestMinerCreateChargesGas(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

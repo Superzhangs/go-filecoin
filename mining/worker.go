@@ -202,7 +202,7 @@ func (w *DefaultWorker) Mine(ctx context.Context, base types.TipSet, nullBlkCoun
 			return false
 		}
 		copy(proof[:], prChRead[:])
-		ticket = CreateTicket(proof, w.minerAddr, w.blockSigner)
+		ticket = CreateTicket(proof, w.blockSignerAddr, w.blockSigner)
 	}
 
 	// TODO: Test the interplay of isWinningTicket() and createPoSTFunc()

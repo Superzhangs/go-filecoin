@@ -15,6 +15,7 @@ import (
 	car "gx/ipfs/QmRa5sdhUGtLptMNYSHFWcU3axEJntpKht3LngrBpuurv1/go-car"
 	blockstore "gx/ipfs/QmS2aqUZLJp8kF1ihE5rvDGE5LvmKDPnx32w9Z1BW9xLV5/go-ipfs-blockstore"
 	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	logging "gx/ipfs/QmcuXC5cxs79ro2cUuHs4HQ2bkDLJUYokwL8aivcX6HW3C/go-log"
 
 	"github.com/filecoin-project/go-filecoin/address"
 	"github.com/filecoin-project/go-filecoin/api"
@@ -25,6 +26,8 @@ import (
 	"github.com/filecoin-project/go-filecoin/repo"
 	"github.com/filecoin-project/go-filecoin/types"
 )
+
+var log = logging.Logger("daemon")
 
 const (
 	// SECP256K1 is a curve used to compute private keys
@@ -92,6 +95,8 @@ func (nd *nodeDaemon) Init(ctx context.Context, opts ...api.DaemonInitOpt) error
 	initopts = append(initopts, node.AutoSealIntervalSecondsOpt(cfg.AutoSealIntervalSeconds))
 
 	if cfg.WithMiner != (address.Address{}) {
+		fmt.Printf("\n\nWithMiner address = %s", cfg.WithMiner.String())
+		log.Debugf("\n\nWithMiner address = %s", cfg.WithMiner.String())
 		newConfig := rep.Config()
 		newConfig.Mining.MinerAddress = cfg.WithMiner
 		if err := rep.ReplaceConfig(newConfig); err != nil {

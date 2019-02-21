@@ -139,20 +139,20 @@ func TestChainSync(t *testing.T) {
 	assert.True(equal, "failed to sync chains")
 }
 
-type zeroRewarder struct{}
+type ZeroRewarder struct{}
 
-func (r *zeroRewarder) BlockReward(ctx context.Context, st state.Tree, minerAddr address.Address) error {
+func (r *ZeroRewarder) BlockReward(ctx context.Context, st state.Tree, minerAddr address.Address) error {
 	return nil
 }
 
-func (r *zeroRewarder) GasReward(ctx context.Context, st state.Tree, minerAddr address.Address, msg *types.SignedMessage, cost *types.AttoFIL) error {
+func (r *ZeroRewarder) GasReward(ctx context.Context, st state.Tree, minerAddr address.Address, msg *types.SignedMessage, cost *types.AttoFIL) error {
 	return nil
 }
 
 // makeNodes makes at least two nodes, a miner and a client; numNodes is the total wanted
 func makeNodes(ctx context.Context, t *testing.T, assertions *assert.Assertions, numNodes int) (address.Address, []*Node) {
 	seed := MakeChainSeed(t, TestGenCfg)
-	configOpts := []ConfigOpt{RewarderConfigOption(&zeroRewarder{})}
+	configOpts := []ConfigOpt{RewarderConfigOption(&(ZeroRewarder{}))}
 	minerNode := MakeNodeWithChainSeed(t, seed, configOpts,
 		PeerKeyOpt(PeerKeys[0]),
 		AutoSealIntervalSecondsOpt(1),
