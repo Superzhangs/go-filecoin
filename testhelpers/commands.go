@@ -766,6 +766,7 @@ func NewDaemon(t *testing.T, options ...func(*TestDaemon)) *TestDaemon {
 	}
 
 	if td.withMiner != "" {
+
 		initopts = append(initopts, fmt.Sprintf("--with-miner=%s", td.withMiner))
 	}
 

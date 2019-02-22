@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"encoding/json"
@@ -18,12 +18,16 @@ import (
 func TestMessageSend(t *testing.T) {
 	t.Parallel()
 
+	firstMiner := fixtures.TestMiners[0]
+
 	d := th.NewDaemon(
 		t,
-		th.WithMiner(fixtures.TestMiners[0]),
+		th.WithMiner(firstMiner),
+		th.DefaultAddress(fixtures.TestAddresses[0]),
 		th.KeyFile(fixtures.KeyFilePaths()[0]),
 		th.KeyFile(fixtures.KeyFilePaths()[1]),
 	).Start()
+
 	defer d.ShutdownSuccess()
 
 	d.RunSuccess("mining", "once")
@@ -40,14 +44,14 @@ func TestMessageSend(t *testing.T) {
 	t.Log("[success] with from")
 	defaultaddr := d.GetDefaultAddress()
 	d.RunSuccess("message", "send",
-		"--from", fixtures.TestAddresses[0],
+		"--from", fixtures.TestAddresses[1],
 		"--price", "0", "--limit", "300",
 		defaultaddr,
 	)
 
 	t.Log("[success] with from and value")
 	d.RunSuccess("message", "send",
-		"--from", fixtures.TestAddresses[0],
+		"--from", fixtures.TestAddresses[1],
 		"--price", "0", "--limit", "300",
 		"--value=10", fixtures.TestAddresses[1],
 	)
@@ -59,6 +63,7 @@ func TestMessageWait(t *testing.T) {
 	d := th.NewDaemon(
 		t,
 		th.WithMiner(fixtures.TestMiners[0]),
+		th.DefaultAddress(fixtures.TestAddresses[0]),
 		th.KeyFile(fixtures.KeyFilePaths()[0]),
 	).Start()
 	defer d.ShutdownSuccess()

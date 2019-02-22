@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"github.com/pkg/errors"
 
 	"github.com/filecoin-project/go-filecoin/actor/builtin"
 	"github.com/filecoin-project/go-filecoin/address"
@@ -22,6 +23,7 @@ func newNodeMining(api *nodeAPI) *nodeMining {
 }
 
 func (api *nodeMining) Once(ctx context.Context) (*types.Block, error) {
+
 	nd := api.api.node
 	ts := nd.ChainReader.Head()
 
@@ -62,6 +64,9 @@ func (api *nodeMining) Once(ctx context.Context) (*types.Block, error) {
 	blockSignerAddrIf, err := nd.PorcelainAPI.ConfigGet("mining.blockSignerAddress")
 	if err != nil {
 		return nil, err
+	}
+	if blockSignerAddrIf == (address.Address{}) {
+		return nil, errors.New("blockSignerAddress is blank; cannot mine")
 	}
 	blockSignerAddr := blockSignerAddrIf.(address.Address)
 

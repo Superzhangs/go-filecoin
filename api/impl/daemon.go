@@ -94,19 +94,23 @@ func (nd *nodeDaemon) Init(ctx context.Context, opts ...api.DaemonInitOpt) error
 
 	initopts = append(initopts, node.AutoSealIntervalSecondsOpt(cfg.AutoSealIntervalSeconds))
 
-	if cfg.WithMiner != (address.Address{}) {
-		fmt.Printf("\n\nWithMiner address = %s", cfg.WithMiner.String())
-		log.Debugf("\n\nWithMiner address = %s", cfg.WithMiner.String())
+	if cfg.DefaultAddress != (address.Address{}) {
 		newConfig := rep.Config()
-		newConfig.Mining.MinerAddress = cfg.WithMiner
+		newConfig.Wallet.DefaultAddress = cfg.DefaultAddress
 		if err := rep.ReplaceConfig(newConfig); err != nil {
 			return err
 		}
 	}
 
-	if cfg.DefaultAddress != (address.Address{}) {
+	if cfg.WithMiner != (address.Address{}) {
 		newConfig := rep.Config()
-		newConfig.Wallet.DefaultAddress = cfg.DefaultAddress
+		if newConfig.Wallet.DefaultAddress == (address.Address{}) {
+			return errors.New("must provide --default-address with --miner-address")
+		}
+		fmt.Printf("\n\nWithMiner address = %s", cfg.WithMiner.String())
+		log.Debugf("\n\nWithMiner address = %s", cfg.WithMiner.String())
+		newConfig.Mining.MinerAddress = cfg.WithMiner
+		newConfig.Mining.BlockSignerAddress = newConfig.Wallet.DefaultAddress
 		if err := rep.ReplaceConfig(newConfig); err != nil {
 			return err
 		}
