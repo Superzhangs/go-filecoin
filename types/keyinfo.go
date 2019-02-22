@@ -1,15 +1,10 @@
 package types
 
 import (
-	"bytes"
-	"crypto/ecdsa"
-	"fmt"
-
 	cbor "gx/ipfs/QmcZLyosDwMKdB6NLRsiss9HXzDPhVhhRtPy67JFKTDQDX/go-ipld-cbor"
 
 	"github.com/filecoin-project/go-filecoin/address"
 	"github.com/filecoin-project/go-filecoin/crypto"
-	cu "github.com/filecoin-project/go-filecoin/crypto/util"
 )
 
 func init() {
@@ -19,7 +14,7 @@ func init() {
 // KeyInfo is a key and its type used for signing
 type KeyInfo struct {
 	// Private key as bytes
-	PrivateKey []byte `json:"privateKey"`
+	PrivateKey crypto.PrivateKey `json:"privateKey"`
 	// Curve used to generate private key
 	Curve string `json:"curve"`
 }
@@ -35,8 +30,8 @@ func (ki *KeyInfo) Marshal() ([]byte, error) {
 }
 
 // Key returns the private key of KeyInfo
-func (ki *KeyInfo) Key() []byte {
-	return ki.PrivateKey
+func (ki *KeyInfo) Key() *crypto.PrivateKey {
+	return &ki.PrivateKey
 }
 
 // Type returns the type of curve used to generate the private key
@@ -56,34 +51,19 @@ func (ki *KeyInfo) Equals(other *KeyInfo) bool {
 		return false
 	}
 
-	return bytes.Equal(ki.PrivateKey, other.PrivateKey)
+	return ki.PrivateKey.Equals(&other.PrivateKey)
 }
 
 // Address returns the address for this keyinfo
 func (ki *KeyInfo) Address() (address.Address, error) {
-	pub, err := ki.PublicKey()
-	if err != nil {
-		return address.Address{}, err
-	}
-
-	addrHash := address.Hash(pub)
+	pub := ki.PublicKey()
+	addrHash := address.Hash(pub.Serialize())
 
 	// TODO: Use the address type we are running on from the config.
 	return address.NewMainnet(addrHash), nil
 }
 
 // PublicKey returns the public key part as uncompressed bytes.
-func (ki *KeyInfo) PublicKey() ([]byte, error) {
-	prv, err := crypto.BytesToECDSA(ki.Key())
-	if err != nil {
-		return nil, err
-	}
-
-	pub, ok := prv.Public().(*ecdsa.PublicKey)
-	if !ok {
-		// means a something is wrong with key generation
-		return nil, fmt.Errorf("unknown public key type")
-	}
-
-	return cu.SerializeUncompressed(pub), nil
+func (ki *KeyInfo) PublicKey() *crypto.PublicKey {
+	return ki.Key().PublicKey()
 }

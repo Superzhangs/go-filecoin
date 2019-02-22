@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"github.com/filecoin-project/go-filecoin/address"
+	"github.com/filecoin-project/go-filecoin/crypto"
 	"github.com/filecoin-project/go-filecoin/types"
 )
 
@@ -19,7 +20,7 @@ type Backend interface {
 
 	// Verify cryptographically verifies that 'sig' is the signed hash of 'data' with
 	// the public key `pk`.
-	Verify(data []byte, pk []byte, sig types.Signature) (bool, error)
+	Verify(data []byte, pk *crypto.PublicKey, sig types.Signature) (bool, error)
 
 	// GetKeyInfo will return the keyinfo associated with address `addr`
 	// iff backend contains the addr.

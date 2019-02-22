@@ -22,3 +22,6 @@ proofs/misc/
 bls-signatures/include/libbls_signatures.h
 bls-signatures/lib/libbls_signatures.a
 bls-signatures/lib/pkgconfig/libbls_signatures.pc
+crypto/include/*.h
+crypto/lib/*.a
+crypto/lib/pkgconfig/*.pc

@@ -4,3 +4,6 @@
 [submodule "proofs/rust-fil-proofs"]
 	path = proofs/rust-fil-proofs
 	url = https://github.com/filecoin-project/rust-fil-proofs.git
+[submodule "crypto/rust-fil-secp256k1"]
+	path = crypto/rust-fil-secp256k1
+	url = https://github.com/filecoin-project/rust-fil-secp256k1.git

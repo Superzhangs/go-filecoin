@@ -44,6 +44,7 @@ import (
 	"github.com/filecoin-project/go-filecoin/config"
 	"github.com/filecoin-project/go-filecoin/consensus"
 	"github.com/filecoin-project/go-filecoin/core"
+	"github.com/filecoin-project/go-filecoin/crypto"
 	"github.com/filecoin-project/go-filecoin/filnet"
 	"github.com/filecoin-project/go-filecoin/lookup"
 	"github.com/filecoin-project/go-filecoin/metrics"
@@ -1091,7 +1092,7 @@ func (node *Node) BlockHeight() (*types.BlockHeight, error) {
 }
 
 // getMinerActorPubKey gets the miner actor public key
-func (node *Node) getMinerActorPubKey() ([]byte, error) {
+func (node *Node) getMinerActorPubKey() (*crypto.PublicKey, error) {
 	addr := node.Repo.Config().Mining.MinerAddress
 
 	// this is expected if there is no miner

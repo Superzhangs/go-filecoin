@@ -8,6 +8,7 @@ import (
 	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 
 	"github.com/filecoin-project/go-filecoin/address"
+	"github.com/filecoin-project/go-filecoin/crypto"
 	"github.com/filecoin-project/go-filecoin/types"
 	wutil "github.com/filecoin-project/go-filecoin/wallet/util"
 )
@@ -108,7 +109,7 @@ func (w *Wallet) SignBytes(data []byte, addr address.Address) (types.Signature, 
 
 // Verify cryptographically verifies that 'sig' is the signed hash of 'data' with
 // the public key `pk`.
-func (w *Wallet) Verify(data []byte, pk []byte, sig types.Signature) (bool, error) {
+func (w *Wallet) Verify(data []byte, pk *crypto.PublicKey, sig types.Signature) (bool, error) {
 	return wutil.Verify(pk, data, sig)
 }
 
@@ -116,7 +117,7 @@ func (w *Wallet) Verify(data []byte, pk []byte, sig types.Signature) (bool, erro
 // signature from data.
 // Note: The returned public key should not be used to verify `data` is valid
 // since a public key may have N private key pairs
-func (w *Wallet) Ecrecover(data []byte, sig types.Signature) ([]byte, error) {
+func (w *Wallet) Ecrecover(data []byte, sig types.Signature) (*crypto.PublicKey, error) {
 	return wutil.Ecrecover(data, sig)
 }
 
@@ -133,16 +134,13 @@ func NewAddress(w *Wallet) (address.Address, error) {
 
 // GetPubKeyForAddress returns the public key in the keystore associated with
 // the given address.
-func (w *Wallet) GetPubKeyForAddress(addr address.Address) ([]byte, error) {
+func (w *Wallet) GetPubKeyForAddress(addr address.Address) (*crypto.PublicKey, error) {
 	info, err := w.keyInfoForAddr(addr)
 	if err != nil {
 		return nil, err
 	}
-	pubkey, err := info.PublicKey()
-	if err != nil {
-		return nil, err
-	}
-	return pubkey, nil
+
+	return info.PublicKey(), nil
 }
 
 // NewKeyInfo creates a new KeyInfo struct in the wallet backend and returns it

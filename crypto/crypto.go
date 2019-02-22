@@ -1,128 +1,67 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
-// THIS WAS TAKEN FROM github.com/ethereum/go-ethereum MODIFY CAREFULLY
-
 package crypto
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
-	"fmt"
 	"io"
-	"math/big"
-
-	cu "github.com/filecoin-project/go-filecoin/crypto/util"
+	"unsafe"
 )
 
-var ( // nolint: deadcode
-	secp256k1N, _  = new(big.Int).SetString("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16) // nolint: varcheck, staticcheck
-	secp256k1halfN = new(big.Int).Div(secp256k1N, big.NewInt(2))                                                    // nolint: varcheck, staticcheck
-)
+// #cgo LDFLAGS: -L${SRCDIR}/lib -lfil_secp256k1
+// #cgo pkg-config: ${SRCDIR}/lib/pkgconfig/libfil_secp256k1.pc
+// #include "./include/libfil_secp256k1.h"
+import "C"
 
-// BytesToECDSA creates a private key with the given D value.
-func BytesToECDSA(d []byte) (*ecdsa.PrivateKey, error) {
-	return toECDSA(d, true)
+const PrivateKeyBytes = 32
+
+// PublicKeySizeBytes is the size of a public key in ncompressed serialized format.
+const PublicKeySizeBytes = 65
+
+const MessageBytes = 32
+
+type PrivateKey [PrivateKeyBytes]byte
+type PublicKey struct{}
+
+func PrivateKeyFromBytes(raw []byte) (*PrivateKey, error) {
+	return nil, nil
 }
 
-// BytesToECDSAUnsafe blindly converts a binary blob to a private key. It should almost
-// never be used unless you are sure the input is valid and want to avoid hitting
-// errors due to bad origin encoding (0 prefixes cut off).
-func BytesToECDSAUnsafe(d []byte) *ecdsa.PrivateKey {
-	priv, _ := toECDSA(d, false)
-	return priv
+func (pk *PrivateKey) PublicKey() *PublicKey {
+	return nil
 }
 
-// toECDSA creates a private key with the given D value. The strict parameter
-// controls whether the key's length should be enforced at the curve size or
-// it can also accept legacy encodings (0 prefixes).
-func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
-	priv := new(ecdsa.PrivateKey)
-	priv.PublicKey.Curve = S256()
-	if strict && 8*len(d) != priv.Params().BitSize {
-		return nil, fmt.Errorf("invalid length, need %d bits", priv.Params().BitSize)
-	}
-	priv.D = new(big.Int).SetBytes(d)
-
-	// The priv.D must < N
-	if priv.D.Cmp(secp256k1N) >= 0 {
-		return nil, fmt.Errorf("invalid private key, >=N")
-	}
-	// The priv.D must not be zero or negative.
-	if priv.D.Sign() <= 0 {
-		return nil, fmt.Errorf("invalid private key, zero or negative")
-	}
-
-	priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.Curve.ScalarBaseMult(d)
-	if priv.PublicKey.X == nil {
-		return nil, errors.New("invalid private key")
-	}
-	return priv, nil
+func (pk *PrivateKey) Sign(data []byte) ([]byte, error) {
+	return nil, nil
 }
 
-// ECDSAToBytes exports a private key into a binary dump.
-func ECDSAToBytes(priv *ecdsa.PrivateKey) []byte {
-	if priv == nil {
-		return nil
-	}
-	return cu.PaddedBigBytes(priv.D, priv.Params().BitSize/8)
+func (pk *PrivateKey) Equals(other *PrivateKey) bool {
+	return false
 }
 
-// BytesToECDSAPub creates a public key with the given `pub` value.
-func BytesToECDSAPub(pub []byte) *ecdsa.PublicKey {
-	if len(pub) == 0 {
-		return nil
-	}
-	x, y := elliptic.Unmarshal(S256(), pub)
-	return &ecdsa.PublicKey{Curve: S256(), X: x, Y: y}
+// Serialize serializes the key in uncompressed form.
+func (pk *PublicKey) Serialize() []byte {
+	return nil
 }
 
-// ECDSAPubToBytes marshals `pub` to a slice of bytes
-func ECDSAPubToBytes(pub *ecdsa.PublicKey) []byte {
-	if pub == nil || pub.X == nil || pub.Y == nil {
-		return nil
-	}
-	return elliptic.Marshal(S256(), pub.X, pub.Y)
+func (pk *PublicKey) Verify(data, signature []byte) (bool, error) {
+	return false, nil
 }
 
-// HexToECDSA parses a secp256k1 private key.
-func HexToECDSA(hexkey string) (*ecdsa.PrivateKey, error) {
-	b, err := hex.DecodeString(hexkey)
-	if err != nil {
-		return nil, errors.New("invalid hex string")
-	}
-	return BytesToECDSA(b)
+func GenerateKeyFromSeed(seed io.Reader) (*PrivateKey, error) {
+	return nil, nil
 }
 
-// GenerateKey generates an ecdsa private key
-func GenerateKey() (*ecdsa.PrivateKey, error) {
-	return GenerateKeyFromSeed(rand.Reader)
+func GenerateKey() *PrivateKey {
+	// call method
+	resPtr := (*C.GenerateKeyResponse)(unsafe.Pointer(C.generate_key()))
+	defer C.destroy_generate_key_response(resPtr)
+
+	// prep response
+	var key PrivateKey
+	keySlice := C.GoBytes(unsafe.Pointer(&resPtr.key), PrivateKeyBytes)
+	copy(key[:], keySlice)
+
+	return &key
 }
 
-// GenerateKeyFromSeed generates an ecdsa private key from `seed`
-func GenerateKeyFromSeed(seed io.Reader) (*ecdsa.PrivateKey, error) {
-	return ecdsa.GenerateKey(S256(), seed)
-}
-
-// zeroBytes will overwrite every byte in `bytes` with a 0
-func zeroBytes(bytes []byte) {
-	for i := range bytes {
-		bytes[i] = 0
-	}
+func EcRecover(data, signature []byte) (*PublicKey, error) {
+	return nil, nil
 }

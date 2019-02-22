@@ -1,8 +1,6 @@
 package wallet
 
 import (
-	"crypto/ecdsa"
-	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -98,14 +96,11 @@ func (backend *DSBackend) HasAddress(addr address.Address) bool {
 // NewAddress creates a new address and stores it.
 // Safe for concurrent access.
 func (backend *DSBackend) NewAddress() (address.Address, error) {
-	prv, err := crypto.GenerateKey()
-	if err != nil {
-		return address.Address{}, err
-	}
+	prv := crypto.GenerateKey()
 
 	// TODO: maybe the above call should just return a keyinfo?
 	ki := &types.KeyInfo{
-		PrivateKey: crypto.ECDSAToBytes(prv),
+		PrivateKey: *prv,
 		Curve:      SECP256K1,
 	}
 
@@ -145,18 +140,13 @@ func (backend *DSBackend) SignBytes(data []byte, addr address.Address) (types.Si
 		return nil, err
 	}
 
-	privateKey, _, err := keysFromInfo(ki)
-	if err != nil {
-		return nil, err
-	}
-
-	return wutil.Sign(privateKey, data)
+	return wutil.Sign(ki.Key(), data)
 }
 
 // Verify cryptographically verifies that 'sig' is the signed hash of 'data' with
 // the public key `pk`.
-func (backend *DSBackend) Verify(data []byte, pk []byte, sig types.Signature) (bool, error) {
-	return wutil.Verify(pk, data, sig)
+func (backend *DSBackend) Verify(data []byte, pk *crypto.PublicKey, sig types.Signature) (bool, error) {
+	return pk.Verify(data, sig)
 }
 
 // GetKeyInfo will return the private & public keys associated with address `addr`
@@ -178,18 +168,4 @@ func (backend *DSBackend) GetKeyInfo(addr address.Address) (*types.KeyInfo, erro
 	}
 
 	return ki, nil
-}
-
-func keysFromInfo(ki *types.KeyInfo) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
-	// Developer error if we add a new type and don't update this method
-	if ki.Type() != SECP256K1 {
-		panic(fmt.Sprintf("unknown key type %s", ki.Type()))
-	}
-
-	prv, err := crypto.BytesToECDSA(ki.Key())
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to unmarshal private key")
-	}
-
-	return prv, &prv.PublicKey, nil
 }

@@ -1,7 +1,6 @@
 package types
 
 import (
-	"crypto/ecdsa"
 	"fmt"
 
 	"gx/ipfs/QmPVkJMTeRC6iBByPWdrRkD3BE5UXsj5HPzb4kPqL186mS/testify/assert"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/filecoin-project/go-filecoin/address"
 	"github.com/filecoin-project/go-filecoin/crypto"
-	cu "github.com/filecoin-project/go-filecoin/crypto/util"
 	wutil "github.com/filecoin-project/go-filecoin/wallet/util"
 )
 
@@ -28,7 +26,7 @@ type MockRecoverer struct{}
 // signature from data.
 // Note: The returned public key should not be used to verify `data` is valid
 // since a public key may have N private key pairs
-func (mr *MockRecoverer) Ecrecover(data []byte, sig Signature) ([]byte, error) {
+func (mr *MockRecoverer) Ecrecover(data []byte, sig Signature) (*crypto.PublicKey, error) {
 	return wutil.Ecrecover(data, sig)
 }
 
@@ -44,17 +42,9 @@ func NewMockSigner(kis []KeyInfo) MockSigner {
 	var ms MockSigner
 	ms.AddrKeyInfo = make(map[address.Address]KeyInfo)
 	for _, k := range kis {
-		// get the secret key
-		sk, err := crypto.BytesToECDSA(k.PrivateKey)
-		if err != nil {
-			panic(err)
-		}
 		// extract public key
-		pub, ok := sk.Public().(*ecdsa.PublicKey)
-		if !ok {
-			panic("unknown public key type")
-		}
-		addrHash := address.Hash(cu.SerializeUncompressed(pub))
+		pub := k.PublicKey()
+		addrHash := address.Hash(pub.Serialize())
 		newAddr := address.NewMainnet(addrHash)
 		ms.Addresses = append(ms.Addresses, newAddr)
 		ms.AddrKeyInfo[newAddr] = k
@@ -70,12 +60,7 @@ func (ms MockSigner) SignBytes(data []byte, addr address.Address) (Signature, er
 		panic("unknown address")
 	}
 
-	sk, err := crypto.BytesToECDSA(ki.PrivateKey)
-	if err != nil {
-		return Signature{}, err
-	}
-
-	return wutil.Sign(sk, data)
+	return ki.Key().Sign(data)
 }
 
 // NewSignedMessageForTestGetter returns a closure that returns a SignedMessage unique to that invocation.

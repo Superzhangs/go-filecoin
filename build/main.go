@@ -130,6 +130,7 @@ func deps() {
 		cmd("go get -u github.com/pmezard/go-difflib/difflib"),
 		cmd("./scripts/install-rust-fil-proofs.sh"),
 		cmd("./scripts/install-bls-signatures.sh"),
+		cmd("./scripts/install-fil-libsecp256k1.sh"),
 		cmd("./proofs/bin/paramfetch fetch --all --json=./proofs/misc/parameters.json"),
 		cmd("./proofs/bin/paramcache"),
 		cmd("./scripts/copy-groth-params.sh"),
