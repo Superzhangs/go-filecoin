@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"fmt"
@@ -8,18 +8,14 @@ import (
 	"github.com/filecoin-project/go-filecoin/fixtures"
 	"github.com/filecoin-project/go-filecoin/protocol/storage"
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 )
 
 func TestListAsks(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
-	minerDaemon := th.NewDaemon(t,
-		th.WithMiner(fixtures.TestMiners[0]),
-		th.KeyFile(fixtures.KeyFilePaths()[0]),
-		th.DefaultAddress(fixtures.TestAddresses[0]),
-	).Start()
+	minerDaemon := makeDaemonWithMinerAndStart(t)
 	defer minerDaemon.ShutdownSuccess()
 
 	minerDaemon.RunSuccess("mining start")
@@ -30,7 +26,7 @@ func TestListAsks(t *testing.T) {
 }
 
 func TestStorageDealsAfterRestart(t *testing.T) {
-	assert := assert.New(t)
+	assert := ast.New(t)
 	minerDaemon := th.NewDaemon(t,
 		th.WithMiner(fixtures.TestMiners[0]),
 		th.KeyFile(fixtures.KeyFilePaths()[0]),
@@ -71,13 +67,9 @@ func TestStorageDealsAfterRestart(t *testing.T) {
 
 func TestDuplicateDeals(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
-	miner := th.NewDaemon(t,
-		th.WithMiner(fixtures.TestMiners[0]),
-		th.KeyFile(fixtures.KeyFilePaths()[0]),
-		th.DefaultAddress(fixtures.TestAddresses[0]),
-	).Start()
+	miner := makeDaemonWithMinerAndStart(t)
 	defer miner.ShutdownSuccess()
 
 	client := th.NewDaemon(t, th.KeyFile(fixtures.KeyFilePaths()[2]), th.DefaultAddress(fixtures.TestAddresses[2])).Start()
@@ -107,13 +99,9 @@ func TestDuplicateDeals(t *testing.T) {
 
 func TestDealWithSameDataAndDifferentMiners(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
-	miner1 := th.NewDaemon(t,
-		th.WithMiner(fixtures.TestMiners[0]),
-		th.KeyFile(fixtures.KeyFilePaths()[0]),
-		th.DefaultAddress(fixtures.TestAddresses[0]),
-	).Start()
+	miner1 := makeDaemonWithMinerAndStart(t)
 	defer miner1.ShutdownSuccess()
 
 	miner2 := th.NewDaemon(t,
@@ -149,13 +137,9 @@ func TestDealWithSameDataAndDifferentMiners(t *testing.T) {
 
 func TestVoucherPersistenceAndPayments(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
-	miner := th.NewDaemon(t,
-		th.WithMiner(fixtures.TestMiners[0]),
-		th.KeyFile(fixtures.KeyFilePaths()[0]),
-		th.DefaultAddress(fixtures.TestAddresses[0]),
-	).Start()
+	miner := makeDaemonWithMinerAndStart(t)
 	defer miner.ShutdownSuccess()
 
 	client := th.NewDaemon(t, th.KeyFile(fixtures.KeyFilePaths()[2]), th.DefaultAddress(fixtures.TestAddresses[2])).Start()

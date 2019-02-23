@@ -8,6 +8,7 @@ import (
 	"github.com/filecoin-project/go-filecoin/api"
 	"github.com/filecoin-project/go-filecoin/consensus"
 	"github.com/filecoin-project/go-filecoin/types"
+	"gx/ipfs/QmPVkJMTeRC6iBByPWdrRkD3BE5UXsj5HPzb4kPqL186mS/testify/require"
 	"io/ioutil"
 	"math/big"
 	"strings"
@@ -17,8 +18,8 @@ import (
 
 	"gx/ipfs/QmY5Grm8pJdiSSVsYxx4uNRgweY72EmYwuSDbRnbFok3iY/go-libp2p-peer"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	ast "github.com/stretchr/testify/assert"
+	req "github.com/stretchr/testify/require"
 
 	"github.com/filecoin-project/go-filecoin/actor/builtin/storagemarket"
 	"github.com/filecoin-project/go-filecoin/address"
@@ -29,7 +30,7 @@ import (
 
 func TestMinerHelp(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	t.Run("--help shows general miner help", func(t *testing.T) {
 		t.Parallel()
@@ -122,7 +123,7 @@ func runHelpSuccess(t *testing.T, args ...string) string {
 
 func TestMinerPledge(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	fi, err := ioutil.TempFile("", "gengentest")
 	if err != nil {
@@ -168,15 +169,15 @@ func TestMinerPledge(t *testing.T) {
 
 func TestMinerCreate(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
-	require := require.New(t)
+	assert := ast.New(t)
+	require := req.New(t)
 
 	testAddr, err := address.NewFromString(fixtures.TestAddresses[2])
 	require.NoError(err)
 
 	t.Run("create --help includes pledge text", func(t *testing.T) {
 		t.Parallel()
-		d := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0])).Start()
+		d := makeDaemonWithMinerAndStart(t)
 		defer d.ShutdownSuccess()
 
 		op1 := d.RunSuccess("miner", "create", "--help")
@@ -190,7 +191,7 @@ func TestMinerCreate(t *testing.T) {
 		var addr address.Address
 
 		tf := func(fromAddress address.Address, pid peer.ID) {
-			d1 := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
+			d1 := makeDaemonWithMinerAndStart(t)
 			defer d1.ShutdownSuccess()
 
 			d := th.NewDaemon(t, th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
@@ -263,7 +264,7 @@ func TestMinerCreate(t *testing.T) {
 
 	t.Run("insufficient pledge", func(t *testing.T) {
 		t.Parallel()
-		d1 := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
+		d1 := makeDaemonWithMinerAndStart(t)
 		defer d1.ShutdownSuccess()
 
 		d := th.NewDaemon(t, th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
@@ -290,7 +291,7 @@ func TestMinerCreate(t *testing.T) {
 
 func TestMinerSetPrice(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	d1 := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[0]), th.DefaultAddress(fixtures.TestAddresses[0])).Start()
 	defer d1.ShutdownSuccess()
@@ -307,8 +308,8 @@ func TestMinerSetPrice(t *testing.T) {
 
 func TestMinerCreateChargesGas(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
-	require := require.New(t)
+	assert := ast.New(t)
+	require := req.New(t)
 
 	miningMinerAddr, err := address.NewFromString(fixtures.TestMiners[0])
 	require.NoError(err)
@@ -360,7 +361,7 @@ func queryBalance(t *testing.T, d *th.TestDaemon, actorAddr address.Address) *ty
 
 func TestMinerAddAskFail(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 	d1 := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
 	defer d1.ShutdownSuccess()
 	d := th.NewDaemon(t, th.CmdTimeout(time.Second*90), th.KeyFile(fixtures.KeyFilePaths()[2])).Start()
@@ -409,7 +410,7 @@ func TestMinerAddAskFail(t *testing.T) {
 
 func TestMinerOwner(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	fi, err := ioutil.TempFile("", "gengentest")
 	if err != nil {
@@ -447,7 +448,7 @@ func TestMinerOwner(t *testing.T) {
 
 func TestMinerPower(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	fi, err := ioutil.TempFile("", "gengentest")
 	if err != nil {

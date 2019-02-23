@@ -1,7 +1,9 @@
-package commands
+package commands_test
 
 import (
 	"fmt"
+	"github.com/filecoin-project/go-filecoin/fixtures"
+	th "github.com/filecoin-project/go-filecoin/testhelpers"
 	"os"
 	"testing"
 
@@ -22,4 +24,14 @@ func requireSchemaConformance(t *testing.T, jsonBytes []byte, schemaName string)
 	}
 
 	require.Truef(t, result.Valid(), "Error schema validating: %s", string(jsonBytes))
+}
+
+func makeDaemonWithMinerAndStart(t *testing.T) *th.TestDaemon {
+	daemon := th.NewDaemon(
+		t,
+		th.DefaultAddress(fixtures.TestAddresses[0]),
+		th.WithMiner(fixtures.TestMiners[0]),
+		th.KeyFile(fixtures.KeyFilePaths()[0]),
+	).Start()
+	return daemon
 }

@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"bytes"
@@ -12,18 +12,18 @@ import (
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
 	"github.com/filecoin-project/go-filecoin/types"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	ast "github.com/stretchr/testify/assert"
+	req "github.com/stretchr/testify/require"
 )
 
 func TestChainDaemon(t *testing.T) {
 	t.Parallel()
 	t.Run("chain ls with json encoding returns the whole chain as json", func(t *testing.T) {
 		t.Parallel()
-		assert := assert.New(t)
-		require := require.New(t)
+		assert := ast.New(t)
+		require := req.New(t)
 
-		d := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0])).Start()
+		d := makeDaemonWithMinerAndStart(t)
 		defer d.ShutdownSuccess()
 
 		op1 := d.RunSuccess("mining", "once", "--enc", "text")
@@ -55,8 +55,8 @@ func TestChainDaemon(t *testing.T) {
 
 	t.Run("chain head with chain of size 1 returns genesis block", func(t *testing.T) {
 		t.Parallel()
-		assert := assert.New(t)
-		require := require.New(t)
+		assert := ast.New(t)
+		require := req.New(t)
 
 		d := th.NewDaemon(t).Start()
 		defer d.ShutdownSuccess()
@@ -73,10 +73,10 @@ func TestChainDaemon(t *testing.T) {
 
 	t.Run("chain ls with text encoding returns only CIDs", func(t *testing.T) {
 		t.Parallel()
-		assert := assert.New(t)
-		require := require.New(t)
+		assert := ast.New(t)
+		require := req.New(t)
 
-		daemon := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0])).Start()
+		daemon := makeDaemonWithMinerAndStart(t)
 		defer daemon.ShutdownSuccess()
 
 		var blocks []types.Block
@@ -96,9 +96,9 @@ func TestChainDaemon(t *testing.T) {
 
 	t.Run("chain ls --long returns CIDs, Miner, block height and message count", func(t *testing.T) {
 		t.Parallel()
-		assert := assert.New(t)
+		assert := ast.New(t)
 
-		daemon := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0])).Start()
+		daemon := makeDaemonWithMinerAndStart(t)
 		defer daemon.ShutdownSuccess()
 
 		newBlockCid := daemon.RunSuccess("mining", "once", "--enc", "text").ReadStdoutTrimNewlines()

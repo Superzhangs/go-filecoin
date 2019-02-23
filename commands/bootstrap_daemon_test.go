@@ -1,16 +1,16 @@
-package commands
+package commands_test
 
 import (
 	"testing"
 
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
 
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 )
 
 func TestBootstrapList(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	d := th.NewDaemon(t).Start()
 	defer d.ShutdownSuccess()

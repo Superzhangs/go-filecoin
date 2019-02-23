@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"fmt"
@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	var gitOut []byte
 	var err error

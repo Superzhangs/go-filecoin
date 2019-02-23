@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"bytes"
@@ -8,15 +8,15 @@ import (
 	"github.com/filecoin-project/go-filecoin/api"
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	ast "github.com/stretchr/testify/assert"
+	req "github.com/stretchr/testify/require"
 )
 
 func TestActorDaemon(t *testing.T) {
 	t.Parallel()
 	t.Run("actor ls --enc json returns NDJSON containing all actors in the state tree", func(t *testing.T) {
-		require := require.New(t)
-		assert := assert.New(t)
+		require := req.New(t)
+		assert := ast.New(t)
 
 		d := th.NewDaemon(t).Start()
 		defer d.ShutdownSuccess()

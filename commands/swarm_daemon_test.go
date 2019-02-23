@@ -1,9 +1,9 @@
-package commands
+package commands_test
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
 )
@@ -29,7 +29,7 @@ func TestSwarmConnectPeersInvalid(t *testing.T) {
 
 func TestSwarmFindPeer(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	d1 := th.NewDaemon(t).Start()
 	defer d1.ShutdownSuccess()

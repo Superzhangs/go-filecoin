@@ -1,4 +1,4 @@
-package commands
+package commands_test
 
 import (
 	"math/big"
@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	"github.com/filecoin-project/go-filecoin/fixtures"
-	th "github.com/filecoin-project/go-filecoin/testhelpers"
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 )
 
-func parseInt(assert *assert.Assertions, s string) *big.Int {
+func parseInt(assert *ast.Assertions, s string) *big.Int {
 	i := new(big.Int)
 	i, err := i.SetString(strings.TrimSpace(s), 10)
 	assert.True(err, "couldn't parse as big.Int %q", s)
@@ -19,8 +18,8 @@ func parseInt(assert *assert.Assertions, s string) *big.Int {
 
 func TestMiningGenBlock(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
-	d := th.NewDaemon(t, th.WithMiner(fixtures.TestMiners[0]), th.KeyFile(fixtures.KeyFilePaths()[0])).Start()
+	assert := ast.New(t)
+	d := makeDaemonWithMinerAndStart(t)
 	defer d.ShutdownSuccess()
 
 	addr := fixtures.TestMiners[0]

@@ -1,14 +1,14 @@
-package commands
+package commands_test
 
 import (
 	"testing"
 
 	th "github.com/filecoin-project/go-filecoin/testhelpers"
-	"github.com/stretchr/testify/assert"
+	ast "github.com/stretchr/testify/assert"
 )
 
 func TestPing2Nodes(t *testing.T) {
-	assert := assert.New(t)
+	assert := ast.New(t)
 
 	d1 := th.NewDaemon(t, th.SwarmAddr("/ip4/127.0.0.1/tcp/6000")).Start()
 	defer d1.ShutdownSuccess()
